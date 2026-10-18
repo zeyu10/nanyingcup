@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<!-- 赛程、学校与辩题请在 data.js 中修改 -->
+<head>
+	<meta charset="UTF-8">
+	<title>············ 2026 南萤杯国际华语辩论赛 ············</title>
+	<link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="assets/vendor/jquery-onepage-scroll/css/onepage-scroll.css">
+	<link rel="stylesheet" href="assets/styles/index.css">
+	<link rel="stylesheet" href="assets/styles/schedule.css">
+	<script src="data.js"></script>
+	<script src="assets/vendor/seajs/sea.js" id="seajsnode"></script>
+</head>
+
+<body>
+	<!-- 赛程、学校与辩题请在 data.js 中修改 -->
+	<div class="match-toolbar">
+		<button type="button" class="match-toolbar__button" id="openMatchPicker">选择场次</button>
+		<button type="button" class="match-toolbar__button" id="openDataEditor">修改数据</button>
+	</div>
+
+	<div class="hideVoice">
+		<div id="jquery_jplayer_1"></div>
+		<button id="play1">play1</button>
+	</div>
+
+	<div class="hideVoice">
+		<div id="jquery_jplayer_2"></div>
+		<button id="play2">play2</button>
+	</div>
+
+	<div class="hideVoice">
+		<div id="jquery_jplayer_3"></div>
+		<button id="play3">play2</button>
+	</div>
+
+	<div class="hideVoice">
+		<div id="jquery_jplayer_4"></div>
+		<button id="play4">play2</button>
+	</div>
+
+	<div class="main">
+		<div class="container-fluid">
+			<div class="row text-center margin-top-sm">
+				<h1>·········<strong id="eventName">2026 南萤杯国际华语辩论赛</strong>·········<br><strong id="currentMatchLabel">小组赛</strong><br><span id="eventSponsor">China Unicom</span></h1>
+				<p class="current-match-topic" id="currentMatchTopic"></p>
+			</div>
+			<div class="row margin-top-lg">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left_head">正方持方</h1>
+						</div>
+						<p class="daibiao_left_head">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right_head">反方持方</h1>
+						</div>
+						<p class="daibiao_right_head">反方</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center"></div>
+			</div>
+		</div>
+
+		<div class="container-fluid">
+			<div class="row text-center margin-top-sm">
+				<h1> 提示声音</h1>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center margin-top-xd">
+					<p><button id="btn1" type="button" class="btn btn-primary btn-lg"
+							style="width:180px;">30秒提示声音</button></p>
+					<p><button id="btn2" type="button" class="btn btn-primary btn-lg"
+							style="width:180px;">0秒提示声音</button></p>
+				</div>
+			</div>
+		</div>
+
+
+		<!---------------------------------------- 第一回合 开局 - 申论-------------------------------------------->
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>开局 - 申论</h1>
+			</div>
+			<div class="row margin-top-xd">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix" >
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="row" style="position: relative;">
+				<div class="col-lg-6 text-center">
+					<!-- <h1>正方</h1> -->
+					<h1 id="timedown6_9" style="font-size: 84px"></h1>
+					<button class="btn btn-primary btn-xs popUpBtn6">显示</button>
+					<div style="display: none;">
+						<button id="beginBtn6" class="btn btn-primary btn-xs">开始</button>
+						<button id="stopBtn6" class="btn btn-primary btn-xs">停止</button>
+						<button id="resetBtn6" class="btn btn-primary btn-xs">重置</button>
+						<input id="input6" type="number" placeholder="秒数" style="color: black;" />
+					</div>
+					<div style="display: none; color: black;">
+						<button id="beginBtn6_9" class="btn btn-primary btn-xs">开始</button>
+						<button id="stopBtn6_9" class="btn btn-primary btn-xs">停止</button>
+						<button id="resetBtn6_9" class="btn btn-primary btn-xs">重置</button>
+						<input id="input6_9" type="number" placeholder="秒数" />
+					</div>
+				</div>
+				<div class="col-lg-6 text-center">
+					<!-- <h1>反方</h1> -->
+					<h1 id="timedown6_10" style="font-size: 84px"></h1>
+					<button class="btn btn-primary btn-xs popUpBtn6">显示</button>
+					<div style="display: none;">
+						<button id="beginBtn6_2" class="btn btn-primary btn-xs">开始</button>
+						<button id="stopBtn6_2" class="btn btn-primary btn-xs">停止</button>
+						<button id="resetBtn6_2" class="btn btn-primary btn-xs">重置</button>
+						<input id="input6_2" type="number" placeholder="秒数" style="color: black;" />
+					</div>
+					<div style="display: none; color: black;">
+						<button id="beginBtn6_10" class="btn btn-primary btn-xs">开始</button>
+						<button id="stopBtn6_10" class="btn btn-primary btn-xs">停止</button>
+						<button id="resetBtn6_10" class="btn btn-primary btn-xs">重置</button>
+						<input id="input6_10" type="number" placeholder="秒数" />
+					</div>
+				</div>
+
+
+				<div class="col-lg-3 text-center" style="display: none;">
+					<h3>一辩</h3>
+					<h1 id="timedown6"></h1>
+				</div>
+
+				<div class="col-lg-3 text-center" style="display: none;">
+					<h3>一辩</h3>
+					<h1 id="timedown6_2"></h1>
+				</div>
+			</div>
+			<div id="timePopUp" class="row"
+				style="display: none; bottom: -4px; position: static; width:100%; z-index:1; background-color: black; margin-top: 10px; padding-bottom: 25px;">
+				<div class="col-lg-12 text-center" style="display: none;">
+					<h4 id="timePopUpText1">一辩总剩余时间</h4>
+					<h1 id="timedown6_0"></h1>
+					<div style="display: none;">
+						<button id="beginBtn6_0" class="btn btn-primary btn-xs">开始</button>
+						<button id="stopBtn6_0" class="btn btn-primary btn-xs">停止</button>
+						<button id="resetBtn6_0" class="btn btn-primary btn-xs">重置</button>
+						<input id="input6_0" type="number" placeholder="秒数" />
+					</div>
+				</div>
+				<div class="col-lg-12 text-center">
+					<h3 id="timePopUpText2">一辩本轮时间</h3>
+					<h1 id="timedown6_8"></h1>
+					<div>
+						<button id="beginBtn6_8" class="btn btn-primary btn-xs">开始</button>
+						<button id="stopBtn6_8" class="btn btn-primary btn-xs" style="display: none;">停止</button>
+						<button id="endBtn6_8" class="btn btn-primary btn-xs">结束</button>
+						<button id="resetBtn6_8" class="btn btn-primary btn-xs">设定</button>
+						<input style="color: black; display: none;" id="input6_8" type="number" value="60"
+							placeholder="秒数" min="60" />
+						<button style="display: none;" id="confirmBtn6" class="btn btn-primary btn-xs">确定</button>
+						<button style="display: none;" id="discardBtn6" class="btn btn-primary btn-xs">返回</button>
+						<button id="backBtn6" class="btn btn-primary btn-xs">返回</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!------------------------------------------------ 第一回合 开局 - 正方质询 ---------------------------------------------------->
+
+
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>开局 - 正方质询</h1>
+			</div>
+			<div class="row margin-top-xd">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="row text-center">
+				<div class="col-lg-6">
+					<h2>质询剩余时间</h2>
+					<h1 id="tw4"></h1>
+					<div style="display: none;">
+
+						<button id="twbeginBtn4">开始</button>
+						<button id="twstopBtn4">停止</button>
+						<button id="twresetBtn4">重置</button>
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<h2>回答保护时间</h2>
+					<h1 id="hd4"></h1>
+					<div style="display: none;">
+						<button id="hdbeginBtn4">开始</button>
+						<button id="hdstopBtn4">停止</button>
+						<button id="hdresetBtn4">重置</button>
+					</div>
+				</div>
+			</div>
+			<div class="row text-center">
+				<button id="flag4Btn" class="btn btn-primary btn-xs">切换计时</button>
+				<button id="flag4StopBtn" class="btn btn-primary btn-xs">停止计时</button>
+				<button id="flag4ResetBtn" class="btn btn-primary btn-xs">重置计时</button> 
+			</div>
+		</div>
+
+
+		<!------------------------------------------------ 第一回合 开局 - 反方质询 ---------------------------------------------------->
+
+
+		<div class="container-fluid" style="position: relative" >
+			<div class="row text-center margin-top-sm">
+				<h1>开局 - 反方质询</h1>
+			</div>
+			<div class="row margin-top-xd">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="row text-center">
+				<div class="col-lg-6">
+					<h2>回答保护时间</h2>
+					<h1 id="hd2"></h1>
+					<div style="display: none;">
+						<button id="hdbeginBtn2">开始</button>
+						<button id="hdstopBtn2">停止</button>
+						<button id="hdresetBtn2">重置</button>
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<h2>质询剩余时间</h2>
+					<h1 id="tw2"></h1>
+					<div style="display: none;">
+
+						<button id="twbeginBtn2">开始</button>
+						<button id="twstopBtn2">停止</button>
+						<button id="twresetBtn2">重置</button>
+					</div>
+				</div>
+			</div>
+			<div class="row text-center">
+				<button id="flag2Btn" class="btn btn-primary btn-xs">切换计时</button>
+				<button id="flag2StopBtn" class="btn btn-primary btn-xs">停止计时</button> 
+				<button id="flag2ResetBtn" class="btn btn-primary btn-xs">重置计时</button> 
+			</div>
+		</div>
+
+		
+		<!---------------------------------------- 第二回合 斗辩  - 总计时 模式 --------------------------------------------------------------->
+
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>斗辩 - 总用时 </h1>
+			</div>
+			<div class="row margin-top-sm">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-6 text-center">
+					<h1 id="timedownShow1"></h1>
+					<button id="resetBtnShow1" class="btn btn-primary btn-xs">设定</button>
+					<input style="color: black; display: none;" id="inputShow1" type="number" value="60"
+						placeholder="秒数" min="60" />
+					<button style="display: none;" id="confirmBtnShow1" class="btn btn-primary btn-xs">确定</button>
+					<button style="display: none;" id="discardBtnShow1" class="btn btn-primary btn-xs">返回</button>
+					<!-- <button id="beginBtn1vn" class="btn btn-primary btn-xs">开始</button>
+					<button id="stopBtn1vn" class="btn btn-primary btn-xs">停止</button>
+					<button id="resetBtn1vn" class="btn btn-primary btn-xs">重置</button> -->
+				</div>
+
+				<div class="col-lg-6 text-center">
+					<h1 id="timedownShow2"></h1>
+					<button id="resetBtnShow2" class="btn btn-primary btn-xs">设定</button>
+					<input style="color: black; display: none;" id="inputShow2" type="number" value="60"
+						placeholder="秒数" min="60" />
+					<button style="display: none;" id="confirmBtnShow2" class="btn btn-primary btn-xs">确定</button>
+					<button style="display: none;" id="discardBtnShow2" class="btn btn-primary btn-xs">返回</button>
+					<!-- <button id="beginBtn1vn" class="btn btn-primary btn-xs">开始</button>
+					<button id="stopBtn1vn" class="btn btn-primary btn-xs">停止</button>
+					<button id="resetBtn1vn" class="btn btn-primary btn-xs">重置</button> -->
+				</div>
+			</div>
+		</div>
+
+
+		<!--------------------------------------------- 第二回合 斗辩  - N v N 模式 --------------------------------------------------->
+
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>斗辩 - NvN 模式</h1>
+			</div>
+			<div class="row margin-top-sm">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-6 text-center">
+					<h1 id="timedown9Free"></h1>
+					<div style="display: none">
+						<button id="beginBtn9">开始</button>
+						<button id="stopBtn9">停止</button>
+						<button id="resetBtn9">重置</button>
+					</div>
+				</div>
+
+				<div class="col-lg-6 text-center">
+					<h1 id="timedown9Free_1"></h1>
+					<div style="display:none;">
+						<button id="beginBtn9_1">开始</button>
+						<button id="stopBtn9_1">停止</button>
+						<button id="resetBtn9_1">重置</button>
+					</div>
+				</div>
+			</div>
+			<div class="row text-center">
+				<button id="resetBtnFree" class="btn btn-primary btn-xs">设定</button>
+				<input style="color: black; display: none;" id="inputFree" type="number" value="60" placeholder="秒数"
+					min="60" />
+				<button style="display: none;" id="confirmBtnFree" class="btn btn-primary btn-xs">确定</button>
+				<button style="display: none;" id="discardBtnFree" class="btn btn-primary btn-xs">返回</button>
+				<button id="doubleBtn" class="btn btn-primary btn-xs">切换计时</button>
+				<button id="doubleStopBtn" class="btn btn-primary btn-xs">停止计时</button>
+			</div>
+		</div>
+
+		<!---------------------------------------- 第二回合 斗辩  - 1 v N 模式 --------------------------------------------------------------->
+
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>斗辩 - 1v N 模式</h1>
+			</div>
+			<div class="row margin-top-sm">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center">
+					<h1 id="timedown1vn"></h1>
+					<button id="resetBtn1vn" class="btn btn-primary btn-xs">设定</button>
+					<input style="color: black; display: none;" id="input1vn" type="number" value="60" placeholder="秒数"
+						min="60" />
+					<button style="display: none;" id="confirmBtn1vn" class="btn btn-primary btn-xs">确定</button>
+					<button style="display: none;" id="discardBtn1vn" class="btn btn-primary btn-xs">返回</button>
+					<button id="beginBtn1vn" class="btn btn-primary btn-xs">开始</button>
+					<button id="stopBtn1vn" class="btn btn-primary btn-xs">停止</button>
+					<!-- <button id="RESET" class="btn btn-primary btn-xs">重置</button> -->
+				</div>
+			</div>
+		</div>
+
+		<!-------------------------------------- 第二回合 斗辩  - 正方小结 模式 --------------------------------------------------------------->
+
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>斗辩 - 正方小结</h1>
+			</div>
+			<div class="row margin-top-sm">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center">
+					<h1 id="timedown2"></h1>
+					<button id="beginBtn2" class="btn btn-primary btn-xs">开始</button>
+					<button id="stopBtn2" class="btn btn-primary btn-xs">停止</button>
+					<button id="resetBtn2" class="btn btn-primary btn-xs">重置</button>
+				</div>
+			</div>
+		</div>
+
+		<!-------------------------------------- 第二回合 斗辩  - 反方小结 模式 --------------------------------------------------------------->
+
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>斗辩 - 反方小结</h1>
+			</div>
+			<div class="row margin-top-sm">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center">
+					<h1 id="timedown3"></h1>
+					<button id="beginBtn3" class="btn btn-primary btn-xs">开始</button>
+					<button id="stopBtn3" class="btn btn-primary btn-xs">停止</button>
+					<button id="resetBtn3" class="btn btn-primary btn-xs">重置</button>
+				</div>
+			</div>
+		</div>
+
+		<!------------------------------------------------------------ 中场休息 --------------------------------------------------------------->
+
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>缓冲时间</h1>
+			</div>
+			<div class="row margin-top-sm">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center">
+					<h1 id="timedown4"></h1>
+					<button id="beginBtn4" class="btn btn-primary btn-xs">开始</button>
+					<button id="stopBtn4" class="btn btn-primary btn-xs">停止</button>
+					<button id="resetBtn4" class="btn btn-primary btn-xs">重置</button>
+				</div>
+			</div>
+		</div>
+
+		<!---------------------------------------- 第三回合 收局   --------------------------------------------------------------->
+
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>收局 - 反方总结陈词</h1>
+			</div>
+			<div class="row margin-top-sm">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center">
+					<h1 id="timedown7"></h1>
+					<button id="beginBtn7" class="btn btn-primary btn-xs">开始</button>
+					<button id="stopBtn7" class="btn btn-primary btn-xs">停止</button>
+					<button id="resetBtn7" class="btn btn-primary btn-xs">重置</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>收局 - 正方总结陈词</h1>
+			</div>
+			<div class="row margin-top-sm">
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/affirmative.png" alt="..." class="img-circle bianfang_image pull-right">
+							<h1 class="pull-right bian_name_left">正方持方</h1>
+						</div>
+						<p class="daibiao_left">正方</p>
+					</div>
+				</div>
+				<div class="col-lg-2 text-center">
+					<img src="assets/images/vs.png" style="height:100px;" alt="">
+				</div>
+				<div class="col-lg-5">
+					<div>
+						<div class="clearfix">
+							<img src="assets/images/negative.png" alt="..." class="img-circle bianfang_image pull-left">
+							<h1 class="pull-left bian_name_right">反方持方</h1>
+						</div>
+						<p class="daibiao_right">反方</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center">
+					<h1 id="timedown7_1"></h1>
+					<button id="beginBtn7_1" class="btn btn-primary btn-xs">开始</button>
+					<button id="stopBtn7_1" class="btn btn-primary btn-xs">停止</button>
+					<button id="resetBtn7_1" class="btn btn-primary btn-xs">重置</button>
+				</div>
+			</div>
+		</div>
+	
+
+	<!------------------------------------------------------------ 中场休息 --------------------------------------------------------------->
+	
+		<div class="container-fluid" style="position: relative">
+			<div class="row text-center margin-top-sm">
+				<h1>缓冲时间</h1>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center">
+					<h1 id="timedown233"></h1>
+					<button id="beginBtn233" class="btn btn-primary btn-xs">开始</button>
+					<button id="stopBtn233" class="btn btn-primary btn-xs">停止</button>
+					<button id="resetBtn233" class="btn btn-primary btn-xs">重置</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// seajs配置
+		seajs.config({
+			base: "./assets/",
+			alias: {
+				"jquery": "jquery/jquery",
+				"onepage": "vendor/jquery-onepage-scroll/js/jquery.onepage-scroll",
+				"jplay": "vendor/jquery-jplayer/jquery.jplayer.min",
+				"timer": "vendor/jquery-custimer/jquery.custimer",
+				"jstorage": "vendor/jquery-jstorage/jstorage.min"
+			},
+			paths: {
+				"jquery": "vendor/jquery"
+			}
+		})
+		seajs.use("js/timer");
+		seajs.use("js/schedule");
+	</script>
+
+</body>
+
+</html>
+<!------------ Newly updated by Lan YC QQ:2862597783-------------------------------------------------------->

@@ -1,0 +1,489 @@
+/* 赛程选择、数据编辑与当前场次展示 */
+
+.match-toolbar {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: calc(100vw - 32px);
+}
+
+.match-toolbar__button,
+.ui-button {
+  border: 1px solid #555;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.58);
+  color: #f4f4f4;
+  font-size: 14px;
+  line-height: 1;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.match-toolbar__button:hover,
+.ui-button:hover {
+  border-color: #ffd54a;
+  color: #ffd54a;
+}
+
+.ui-button--primary {
+  border-color: #ffd54a;
+  background: #ffd54a;
+  color: #161616;
+  font-weight: 600;
+}
+
+.ui-button--primary:hover {
+  background: #ffe27a;
+  color: #111;
+}
+
+.ui-button--danger:hover {
+  border-color: #ff7a7a;
+  color: #ff7a7a;
+}
+
+.ui-button--small {
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.current-match-topic {
+  margin: 18px auto 0;
+  max-width: 1100px;
+  color: #ffd54a;
+  font-size: 22px;
+  line-height: 1.6;
+}
+
+.team-side {
+  float: right;
+  width: calc(100% - 120px);
+}
+
+.team-side--right {
+  float: left;
+}
+
+.side-topic {
+  margin: 8px 0 0;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.side-topic--left {
+  text-align: right;
+}
+
+.side-topic--right {
+  text-align: left;
+}
+
+/* 弹窗 */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: none;
+}
+
+.modal.is-open {
+  display: block;
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.modal__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1120px, calc(100vw - 32px));
+  max-height: 90vh;
+  margin: 5vh auto;
+  overflow: hidden;
+  border: 1px solid #3d3d3d;
+  border-radius: 14px;
+  background: #1b1b1b;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
+  color: #f2f2f2;
+}
+
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid #333;
+}
+
+.modal__header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+.modal__subtitle {
+  margin: 6px 0 0;
+  color: #aaa;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.modal__close {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #444;
+  border-radius: 50%;
+  background: transparent;
+  color: #bbb;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal__close:hover {
+  border-color: #ffd54a;
+  color: #ffd54a;
+}
+
+.modal__body {
+  overflow: auto;
+  padding: 18px 22px 22px;
+}
+
+.modal__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid #333;
+  background: #191919;
+}
+
+.modal__note {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-left: 3px solid #ffd54a;
+  background: #242424;
+  color: #bdbdbd;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* 场次选择 */
+.match-groups {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.match-group-card {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #383838;
+  border-radius: 10px;
+  background: #242424;
+}
+
+.match-group-card h3 {
+  margin: 0 0 4px;
+  color: #ffd54a;
+  font-size: 18px;
+}
+
+.match-group-card__teams {
+  min-height: 34px;
+  margin: 0 0 10px;
+  color: #9f9f9f;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.match-option {
+  display: block;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid #3f3f3f;
+  border-radius: 8px;
+  background: #2d2d2d;
+  color: #eee;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.match-option:last-child {
+  margin-bottom: 0;
+}
+
+.match-option:hover {
+  border-color: #ffd54a;
+  background: #343434;
+}
+
+.match-option.is-active {
+  border-color: #ffd54a;
+  background: #3a3727;
+  box-shadow: inset 0 0 0 1px #ffd54a;
+}
+
+.match-option__round {
+  display: block;
+  margin-bottom: 3px;
+  color: #a8a8a8;
+  font-size: 11px;
+}
+
+.match-option__teams {
+  display: block;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.match-option__teams em {
+  color: #ffd54a;
+  font-style: normal;
+}
+
+/* 数据编辑 */
+.editor-section + .editor-section {
+  margin-top: 26px;
+}
+
+.editor-section h3 {
+  margin: 0 0 10px;
+  color: #ffd54a;
+  font-size: 18px;
+}
+
+.editor-scroll {
+  overflow-x: auto;
+}
+
+.editor-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.editor-table th,
+.editor-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #333;
+  vertical-align: middle;
+}
+
+.editor-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #1b1b1b;
+  color: #9f9f9f;
+  font-weight: 500;
+  text-align: left;
+}
+
+.editor-table td:first-child {
+  width: 70px;
+}
+
+.editor-table input,
+.editor-table textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 9px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #111;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.editor-table textarea {
+  min-height: 48px;
+  resize: vertical;
+}
+
+.editor-table input:focus,
+.editor-table textarea:focus {
+  outline: none;
+  border-color: #ffd54a;
+}
+
+.editor-table input::placeholder,
+.editor-table textarea::placeholder {
+  color: #6f6f6f;
+}
+
+.editor-group-label {
+  padding-top: 18px !important;
+  color: #ffd54a;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.editor-code {
+  color: #ffd54a;
+  white-space: nowrap;
+}
+
+.editor-versus {
+  color: #ccc;
+  white-space: nowrap;
+}
+
+.editor-empty {
+  padding: 30px 0;
+  color: #999;
+  text-align: center;
+}
+
+#extraMatchEditor {
+  min-width: 780px;
+}
+
+.extra-form {
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px dashed #444;
+  border-radius: 10px;
+  background: #202020;
+}
+
+.extra-form__title {
+  margin: 0 0 12px;
+  color: #ffd54a;
+  font-size: 16px;
+}
+
+.extra-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.extra-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.extra-form__field--wide {
+  grid-column: 1 / -1;
+}
+
+.extra-form__label {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.extra-form input,
+.extra-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 9px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #111;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.extra-form textarea {
+  min-height: 48px;
+  resize: vertical;
+}
+
+.extra-form input:focus,
+.extra-form textarea:focus {
+  outline: none;
+  border-color: #ffd54a;
+}
+
+.extra-form input::placeholder,
+.extra-form textarea::placeholder {
+  color: #6f6f6f;
+}
+
+/* 提示 */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  z-index: 4000;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #ffd54a;
+  color: #161616;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 16px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast.is-show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 1100px) {
+  .match-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .match-toolbar {
+    top: 10px;
+    right: 10px;
+  }
+
+  .match-groups {
+    grid-template-columns: 1fr;
+  }
+
+  .extra-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal__panel {
+    width: calc(100vw - 20px);
+    max-height: 94vh;
+    margin: 3vh auto;
+  }
+
+  .modal__header,
+  .modal__body,
+  .modal__footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .current-match-topic {
+    padding: 0 12px;
+    font-size: 18px;
+  }
+}
