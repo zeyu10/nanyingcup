@@ -1,5 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
   <circle cx="100" cy="100" r="100" fill="#3a3a3a"/>
   <circle cx="100" cy="100" r="88" fill="none" stroke="#666" stroke-width="2" stroke-dasharray="8 6"/>
-  <text x="100" y="112" text-anchor="middle" fill="#cfcfcf" font-family="'Microsoft YaHei','PingFang SC','Noto Sans CJK SC',sans-serif" font-size="34">待定</text>
+  <path d="M100 58 L152 84 L100 110 L48 84 Z" fill="#cfcfcf"/>
+  <path d="M72 98 V120 C72 131 128 131 128 120 V98" fill="none" stroke="#cfcfcf" stroke-width="6" stroke-linecap="round"/>
+  <path d="M152 84 V122" fill="none" stroke="#cfcfcf" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="152" cy="126" r="6" fill="#cfcfcf"/>
 </svg>

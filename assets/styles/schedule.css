@@ -70,6 +70,22 @@
   float: left;
 }
 
+.clearfix.has-double-logo .team-side {
+  width: calc(100% - 245px);
+}
+
+.clearfix.has-double-logo .bianfang_image {
+  margin: 0 4px;
+}
+
+.clearfix.has-double-logo .side-topic--left {
+  margin-right: -118px;
+}
+
+.clearfix.has-double-logo .side-topic--right {
+  margin-left: -118px;
+}
+
 .side-topic {
   margin: 8px 0 0;
   color: #fff;
@@ -108,7 +124,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  width: min(1120px, calc(100vw - 32px));
+  width: min(1360px, calc(100vw - 32px));
   max-height: 90vh;
   margin: 5vh auto;
   overflow: hidden;
@@ -206,12 +222,41 @@
   font-size: 18px;
 }
 
+.match-group-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.match-group-card__header h3 {
+  flex: none;
+  margin: 0;
+}
+
 .match-group-card__teams {
-  min-height: 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   margin: 0 0 10px;
-  color: #9f9f9f;
+}
+
+.match-group-card__header .match-group-card__teams {
+  flex: 1;
+  margin: 0;
+}
+
+.match-group-card__team-line {
+  color: #c8c8c8;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.45;
+}
+
+.match-group-card__team-code {
+  display: inline-block;
+  min-width: 2.2em;
+  margin-right: 4px;
+  color: #ffd54a;
 }
 
 .match-option {
@@ -250,15 +295,28 @@
   font-size: 11px;
 }
 
-.match-option__teams {
+.match-option__team {
   display: block;
   font-size: 13px;
   line-height: 1.45;
 }
 
-.match-option__teams em {
+.match-option__team + .match-option__team {
+  margin-top: 3px;
+}
+
+.match-option__team em {
+  display: inline-block;
+  min-width: 2.4em;
   color: #ffd54a;
   font-style: normal;
+}
+
+.match-option__meta {
+  display: block;
+  margin-top: 4px;
+  color: #8f8f8f;
+  font-size: 11px;
 }
 
 /* 数据编辑 */
@@ -358,7 +416,89 @@
 }
 
 #extraMatchEditor {
-  min-width: 780px;
+  min-width: 1200px;
+}
+
+#topicEditor {
+  min-width: 900px;
+}
+
+#teamEditor {
+  min-width: 1140px;
+}
+
+.logo-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-input-wrap > input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+.logo-preview {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #555;
+  border-radius: 50%;
+  background: #111;
+  object-fit: cover;
+}
+
+.editor-combined {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #aaa;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.editor-table input[type="checkbox"],
+.extra-form input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  accent-color: #ffd54a;
+}
+
+.extra-form__inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.extra-form__inline > input[type="text"] {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.extra-form__checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #aaa;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.extra-form__logo-pair {
+  display: flex;
+  gap: 8px;
+}
+
+.extra-form__logo-pair .logo-input-wrap {
+  flex: 1;
+  min-width: 0;
 }
 
 .extra-form {

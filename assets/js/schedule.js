@@ -21,8 +21,19 @@ define(function (require, exports, module) {
     '武汉大学.webp',
     '浙江大学.webp',
     '浙江理工大学.webp',
-    '湖南大学.webp',
-    '重庆大学.webp'
+    '湖南大学.jpg',
+    '重庆大学.webp',
+    '博特拉大学.png',
+    '悉尼大学.png',
+    '新南威尔士大学.webp',
+    '新加坡国立大学.png',
+    '马来亚大学.png',
+    '杜伦大学.png',
+    '台北科技大学.png',
+    '墨尔本大学.png',
+    '伦敦政治经济学院.png',
+    '双溪威拉曼大学.png',
+    '复旦大学.webp'
   ];
 
   var sourceData = normalizeData(window.TOURNAMENT_DATA);
@@ -128,7 +139,8 @@ define(function (require, exports, module) {
       teams.push({
         code: trim(team.code) || ('T' + (index + 1)),
         school: trim(team.school) || '待定',
-        logo: trim(team.logo)
+        logo: trim(team.logo),
+        logos: normalizeLogoList(team.logos)
       });
     });
 
@@ -156,21 +168,25 @@ define(function (require, exports, module) {
           round: Number(match.round) || (matchIndex + 1),
           home: trim(match.home) || teamCodes[0] || '',
           away: trim(match.away) || teamCodes[1] || '',
-          topic: trim(match.topic) || '待定辩题'
+          date: trim(match.date),
+          time: trim(match.time)
         });
       });
 
       if (!matches.length && teamCodes.length >= 3) {
         matches = [
-          { id: groupId + '-1', round: 1, home: teamCodes[0], away: teamCodes[1], topic: '待定辩题' },
-          { id: groupId + '-2', round: 2, home: teamCodes[1], away: teamCodes[2], topic: '待定辩题' },
-          { id: groupId + '-3', round: 3, home: teamCodes[2], away: teamCodes[0], topic: '待定辩题' }
+          { id: groupId + '-1', round: 1, home: teamCodes[0], away: teamCodes[1], date: '', time: '' },
+          { id: groupId + '-2', round: 2, home: teamCodes[1], away: teamCodes[2], date: '', time: '' },
+          { id: groupId + '-3', round: 3, home: teamCodes[2], away: teamCodes[0], date: '', time: '' }
         ];
       }
 
       groups.push({
         id: groupId,
         name: trim(group.name) || (groupId + '组'),
+        topic: trim(group.topic) || '待定辩题',
+        proTopic: trim(group.proTopic),
+        conTopic: trim(group.conTopic),
         teamCodes: teamCodes,
         matches: matches
       });
@@ -187,7 +203,11 @@ define(function (require, exports, module) {
         round: Number(match.round) || (matchIndex + 1),
         home: normalizeExtraTeam(match.home),
         away: normalizeExtraTeam(match.away),
-        topic: trim(match.topic) || '待定辩题'
+        date: trim(match.date),
+        time: trim(match.time),
+        topic: trim(match.topic) || '待定辩题',
+        proTopic: trim(match.proTopic),
+        conTopic: trim(match.conTopic)
       });
     });
 
@@ -203,18 +223,28 @@ define(function (require, exports, module) {
     };
   }
 
+  function normalizeLogoList(logos) {
+    var list = [];
+    each(logos, function (name) {
+      list.push(trim(name));
+    });
+    return list.length > 2 ? list.slice(0, 2) : list;
+  }
+
   function normalizeExtraTeam(team) {
     if (team && typeof team === 'object') {
       return {
         code: trim(team.code),
         school: trim(team.school) || '待定',
-        logo: trim(team.logo)
+        logo: trim(team.logo),
+        logos: normalizeLogoList(team.logos)
       };
     }
     return {
       code: '',
       school: trim(team) || '待定',
-      logo: ''
+      logo: '',
+      logos: []
     };
   }
 
@@ -253,6 +283,26 @@ define(function (require, exports, module) {
       map[team.code] = team;
     });
     return map;
+  }
+
+  function findTeam(code) {
+    var result = null;
+    each(data.teams, function (team) {
+      if (team.code === code) {
+        result = team;
+      }
+    });
+    return result;
+  }
+
+  function findGroup(id) {
+    var result = null;
+    each(data.groups, function (group) {
+      if (group.id === id) {
+        result = group;
+      }
+    });
+    return result;
   }
 
   function teamFor(code, map) {
@@ -314,14 +364,23 @@ define(function (require, exports, module) {
     return found.isExtra ? ('第' + found.match.round + '场') : ('第' + found.match.round + '轮');
   }
 
+  function matchDateTime(match) {
+    var date = trim(match.date);
+    var time = trim(match.time);
+    if (date && time) {
+      return date + ' ' + time;
+    }
+    return date || time;
+  }
+
   function ensureCurrentMatch() {
     if (!findMatch(currentMatchId)) {
       currentMatchId = firstMatchId();
     }
   }
 
-  function logoUrl(team) {
-    var logo = trim(team.logo);
+  function logoFileUrl(filename) {
+    var logo = trim(filename);
     if (!logo) {
       return PLACEHOLDER_LOGO;
     }
@@ -334,14 +393,99 @@ define(function (require, exports, module) {
     return LOGO_DIR + encodeURI(logo);
   }
 
+  function setLogoPreview(preview, filename) {
+    preview.onerror = function () {
+      if (preview.src.indexOf('team-placeholder.svg') === -1) {
+        preview.src = PLACEHOLDER_LOGO;
+      }
+    };
+    preview.src = logoFileUrl(filename);
+  }
+
+  function bindLogoPreview(input, preview) {
+    function update() {
+      setLogoPreview(preview, input.value);
+    }
+    input.addEventListener('input', update);
+    input.addEventListener('change', update);
+    update();
+  }
+
+  function createLogoPreview() {
+    var preview = createEl('img', 'logo-preview');
+    preview.alt = '';
+    return preview;
+  }
+
+  function teamLogos(team) {
+    if (isArray(team.logos) && team.logos.length >= 2) {
+      return normalizeLogoList(team.logos);
+    }
+    var logo = trim(team.logo);
+    return logo ? [logo] : [];
+  }
+
+  function ensureTeamLogos() {
+    each(qsa('.bianfang_image'), function (img) {
+      if (img.classList.contains('bianfang_image--secondary')) {
+        return;
+      }
+      if (img.nextElementSibling && img.nextElementSibling.classList.contains('bianfang_image--secondary')) {
+        return;
+      }
+      var secondary = img.cloneNode(false);
+      secondary.classList.add('bianfang_image--secondary');
+      secondary.removeAttribute('id');
+      secondary.alt = '';
+      secondary.style.display = 'none';
+      img.parentNode.insertBefore(secondary, img.nextSibling);
+    });
+  }
+
   function setImages(selector, team) {
+    var logos = teamLogos(team);
+
     each(qsa(selector), function (img) {
-      img.src = logoUrl(team);
+      if (img.classList.contains('bianfang_image--secondary')) {
+        return;
+      }
+
+      var secondary = img.nextElementSibling;
+      if (!secondary || !secondary.classList.contains('bianfang_image--secondary')) {
+        secondary = null;
+      }
+
+      var clearfix = img.parentNode;
       img.alt = team.school;
       img.onerror = function () {
         img.onerror = null;
         img.src = PLACEHOLDER_LOGO;
       };
+
+      if (logos.length >= 2) {
+        img.src = logoFileUrl(logos[0]);
+        img.style.display = '';
+        if (secondary) {
+          secondary.src = logoFileUrl(logos[1]);
+          secondary.onerror = function () {
+            secondary.onerror = null;
+            secondary.src = PLACEHOLDER_LOGO;
+          };
+          secondary.style.display = '';
+        }
+        if (clearfix && clearfix.classList) {
+          clearfix.classList.add('has-double-logo');
+        }
+      } else {
+        img.src = logoFileUrl(logos[0] || '');
+        img.style.display = '';
+        if (secondary) {
+          secondary.style.display = 'none';
+        }
+        if (clearfix && clearfix.classList) {
+          clearfix.classList.remove('has-double-logo');
+        }
+      }
     });
   }
 
@@ -362,13 +506,36 @@ define(function (require, exports, module) {
     return { pro: text(topic), con: text(topic) };
   }
 
-  function setSideTopics(topic) {
+  function formatBigTopic(topic) {
+    return text(topic).replace(/\s*\/\s*/g, ' / ').trim();
+  }
+
+  function topicInfo(found) {
+    var source = found.isExtra ? found.match : found.group;
+    var topic = trim(source.topic);
+    var pro = trim(source.proTopic);
+    var con = trim(source.conTopic);
     var parts = splitTopic(topic);
+
+    if (!topic) {
+      topic = parts.pro + (parts.con ? ' / ' + parts.con : '');
+    }
+    if (!pro) {
+      pro = parts.pro;
+    }
+    if (!con) {
+      con = parts.con;
+    }
+
+    return { topic: topic, pro: pro, con: con };
+  }
+
+  function setSideTopics(info) {
     each(qsa('.side-topic--left'), function (el) {
-      el.textContent = parts.pro;
+      el.textContent = info.pro ? '正方：' + info.pro : '';
     });
     each(qsa('.side-topic--right'), function (el) {
-      el.textContent = parts.con;
+      el.textContent = info.con ? '反方：' + info.con : '';
     });
   }
 
@@ -419,7 +586,7 @@ define(function (require, exports, module) {
       if (topic) {
         topic.textContent = '未找到赛程数据，请检查 data.js';
       }
-      setSideTopics('');
+      setSideTopics({ pro: '', con: '' });
       document.title = data.event.name;
       return;
     }
@@ -440,13 +607,15 @@ define(function (require, exports, module) {
       el.textContent = '反方持方';
     });
 
-    setSideTopics(found.match.topic);
+    var info = topicInfo(found);
+    setSideTopics(info);
 
     if (label) {
-      label.textContent = matchLabel(found);
+      var dateTime = matchDateTime(found.match);
+      label.textContent = matchLabel(found) + (dateTime ? ' · ' + dateTime : '');
     }
     if (topic) {
-      topic.textContent = '辩题：' + found.match.topic;
+      topic.textContent = '辩题：' + formatBigTopic(info.topic);
     }
 
     document.title = home.school + ' vs ' + away.school + ' | ' + matchLabel(found) + ' · ' + data.event.name;
@@ -493,16 +662,20 @@ define(function (require, exports, module) {
 
     each(data.groups, function (group) {
       var card = createEl('section', 'match-group-card');
+      var header = createEl('div', 'match-group-card__header');
       var title = createEl('h3', '', group.name);
-      var teamNames = [];
+      var teams = createEl('div', 'match-group-card__teams');
 
       each(group.teamCodes, function (code) {
-        teamNames.push(teamFor(code, map).school);
+        var line = createEl('span', 'match-group-card__team-line');
+        line.appendChild(createEl('span', 'match-group-card__team-code', code));
+        line.appendChild(document.createTextNode(teamFor(code, map).school));
+        teams.appendChild(line);
       });
 
-      var teams = createEl('p', 'match-group-card__teams', teamNames.join(' · '));
-      card.appendChild(title);
-      card.appendChild(teams);
+      header.appendChild(title);
+      header.appendChild(teams);
+      card.appendChild(header);
 
       each(group.matches, function (match) {
         var home = teamFor(match.home, map);
@@ -515,13 +688,23 @@ define(function (require, exports, module) {
         }
 
         var round = createEl('span', 'match-option__round', '第' + match.round + '轮');
-        var teamsLine = createEl('span', 'match-option__teams');
-        teamsLine.appendChild(document.createTextNode(home.school + ' '));
-        teamsLine.appendChild(createEl('em', '', 'vs'));
-        teamsLine.appendChild(document.createTextNode(' ' + away.school));
+        var homeLine = createEl('span', 'match-option__team');
+        homeLine.appendChild(createEl('em', '', '正方'));
+        homeLine.appendChild(document.createTextNode(home.school));
+
+        var awayLine = createEl('span', 'match-option__team');
+        awayLine.appendChild(createEl('em', '', '反方'));
+        awayLine.appendChild(document.createTextNode(away.school));
 
         button.appendChild(round);
-        button.appendChild(teamsLine);
+        button.appendChild(homeLine);
+        button.appendChild(awayLine);
+
+        var dateTime = matchDateTime(match);
+        if (dateTime) {
+          button.appendChild(createEl('span', 'match-option__meta', dateTime));
+        }
+
         button.addEventListener('click', function () {
           selectMatch(match.id);
         });
@@ -558,13 +741,23 @@ define(function (require, exports, module) {
         }
 
         var round = createEl('span', 'match-option__round', '第' + match.round + '场');
-        var teamsLine = createEl('span', 'match-option__teams');
-        teamsLine.appendChild(document.createTextNode(home.school + ' '));
-        teamsLine.appendChild(createEl('em', '', 'vs'));
-        teamsLine.appendChild(document.createTextNode(' ' + away.school));
+        var homeLine = createEl('span', 'match-option__team');
+        homeLine.appendChild(createEl('em', '', '正方'));
+        homeLine.appendChild(document.createTextNode(home.school));
+
+        var awayLine = createEl('span', 'match-option__team');
+        awayLine.appendChild(createEl('em', '', '反方'));
+        awayLine.appendChild(document.createTextNode(away.school));
 
         button.appendChild(round);
-        button.appendChild(teamsLine);
+        button.appendChild(homeLine);
+        button.appendChild(awayLine);
+
+        var dateTime = matchDateTime(match);
+        if (dateTime) {
+          button.appendChild(createEl('span', 'match-option__meta', dateTime));
+        }
+
         button.addEventListener('click', function () {
           selectMatch(match.id);
         });
@@ -605,10 +798,13 @@ define(function (require, exports, module) {
     each(KNOWN_LOGOS, addLogo);
     each(data.teams, function (team) {
       addLogo(team.logo);
+      each(team.logos, addLogo);
     });
     each(data.extraMatches, function (match) {
       addLogo(match.home.logo);
+      each(match.home.logos, addLogo);
       addLogo(match.away.logo);
+      each(match.away.logos, addLogo);
     });
 
     logos.sort(function (a, b) {
@@ -622,21 +818,24 @@ define(function (require, exports, module) {
     });
   }
 
-  function buildSchoolLogoMap() {
+  function buildSchoolDataMap() {
     var map = {};
     each(data.teams, function (team) {
       if (team.school && team.school !== '待定') {
-        map[team.school] = team.logo || '';
+        map[team.school] = {
+          logo: team.logo,
+          logos: team.logos || []
+        };
       }
     });
     each(data.extraMatches, function (match) {
       var home = normalizeExtraTeam(match.home);
       var away = normalizeExtraTeam(match.away);
       if (home.school && home.school !== '待定') {
-        map[home.school] = home.logo || '';
+        map[home.school] = { logo: home.logo, logos: home.logos };
       }
       if (away.school && away.school !== '待定') {
-        map[away.school] = away.logo || '';
+        map[away.school] = { logo: away.logo, logos: away.logos };
       }
     });
     return map;
@@ -678,16 +877,32 @@ define(function (require, exports, module) {
     });
   }
 
-  function bindSchoolAutofill(schoolInput, logoInput) {
+  function bindSchoolAutofill(schoolInput, logoInput, logo2Input, logo2Item, combinedInput) {
     function fill(force) {
       var name = trim(schoolInput.value);
-      var map = buildSchoolLogoMap();
-      if (!Object.prototype.hasOwnProperty.call(map, name)) {
+      var map = buildSchoolDataMap();
+      var team = map[name];
+      if (!team) {
         return;
       }
-      if (force || !trim(logoInput.value)) {
-        logoInput.value = map[name] || '';
+      if (!force && trim(logoInput.value)) {
+        return;
       }
+
+      var logos = isArray(team.logos) && team.logos.length >= 2
+        ? normalizeLogoList(team.logos)
+        : (team.logo ? [team.logo] : []);
+      var combined = logos.length >= 2;
+
+      combinedInput.checked = combined;
+      logo2Input.disabled = !combined;
+      if (logo2Item) {
+        logo2Item.style.display = combined ? '' : 'none';
+      }
+      logoInput.value = logos[0] || '';
+      logo2Input.value = combined ? (logos[1] || '') : '';
+      logoInput.dispatchEvent(new Event('input', { bubbles: true }));
+      logo2Input.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     schoolInput.addEventListener('change', function () {
@@ -698,31 +913,49 @@ define(function (require, exports, module) {
     });
   }
 
+  function bindCombinedToggle(combinedInput, logo2Input, logo2Item) {
+    combinedInput.addEventListener('change', function () {
+      var show = combinedInput.checked;
+      logo2Input.disabled = !show;
+      if (logo2Item) {
+        logo2Item.style.display = show ? '' : 'none';
+      } else {
+        logo2Input.style.display = show ? '' : 'none';
+      }
+      if (!show) {
+        logo2Input.value = '';
+        logo2Input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+  }
+
   function buildEditor() {
-    if (!els.teamEditor || !els.matchEditor || !els.extraMatchEditor) {
+    if (!els.teamEditor || !els.topicEditor || !els.extraMatchEditor) {
       return;
     }
 
     els.teamEditor.textContent = '';
-    els.matchEditor.textContent = '';
+    els.topicEditor.textContent = '';
     els.extraMatchEditor.textContent = '';
     buildLogoOptions();
     buildSchoolOptions();
 
-    appendTableHeader(els.teamEditor, ['编号', '学校名称', '校徽文件（assets/logo 下的文件名）']);
+    appendTableHeader(els.teamEditor, ['编号', '学校名称', '联队', '校徽 1', '校徽 2']);
     var teamBody = document.createElement('tbody');
 
     if (!data.teams.length) {
       var emptyRow = document.createElement('tr');
       var emptyCell = document.createElement('td');
-      emptyCell.colSpan = 3;
+      emptyCell.colSpan = 5;
       emptyCell.className = 'editor-empty';
       emptyCell.textContent = '暂无学校数据';
       emptyRow.appendChild(emptyCell);
       teamBody.appendChild(emptyRow);
     } else {
       each(data.teams, function (team) {
+        var isCombined = isArray(team.logos) && team.logos.length >= 2;
         var tr = document.createElement('tr');
+        tr.setAttribute('data-team-code', team.code);
         tr.appendChild(createEl('td', 'editor-code', team.code));
 
         var schoolCell = document.createElement('td');
@@ -730,21 +963,60 @@ define(function (require, exports, module) {
         schoolInput.type = 'text';
         schoolInput.value = team.school;
         schoolInput.placeholder = '学校名称';
-        schoolInput.setAttribute('data-team-code', team.code);
         schoolInput.setAttribute('data-field', 'school');
+        schoolInput.setAttribute('list', 'schoolOptions');
         schoolCell.appendChild(schoolInput);
         tr.appendChild(schoolCell);
 
-        var logoCell = document.createElement('td');
-        var logoInput = document.createElement('input');
-        logoInput.type = 'text';
-        logoInput.value = team.logo;
-        logoInput.placeholder = '例如：上海交通大学.webp（留空显示待定图标）';
-        logoInput.setAttribute('data-team-code', team.code);
-        logoInput.setAttribute('data-field', 'logo');
-        logoInput.setAttribute('list', 'logoOptions');
-        logoCell.appendChild(logoInput);
-        tr.appendChild(logoCell);
+        var combinedCell = document.createElement('td');
+        var combinedLabel = createEl('label', 'editor-combined');
+        var combinedInput = document.createElement('input');
+        combinedInput.type = 'checkbox';
+        combinedInput.checked = isCombined;
+        combinedInput.setAttribute('data-field', 'combined');
+        combinedLabel.appendChild(combinedInput);
+        combinedLabel.appendChild(document.createTextNode(' 联队'));
+        combinedCell.appendChild(combinedLabel);
+        tr.appendChild(combinedCell);
+
+        var logo1Cell = document.createElement('td');
+        var logo1Wrap = createEl('div', 'logo-input-wrap');
+        var logo1Input = document.createElement('input');
+        logo1Input.type = 'text';
+        logo1Input.value = isCombined ? (team.logos[0] || '') : (team.logo || '');
+        logo1Input.placeholder = '校徽 1 文件名';
+        logo1Input.setAttribute('data-field', 'logo');
+        logo1Input.setAttribute('list', 'logoOptions');
+        var logo1Preview = createLogoPreview();
+        logo1Wrap.appendChild(logo1Input);
+        logo1Wrap.appendChild(logo1Preview);
+        logo1Cell.appendChild(logo1Wrap);
+        tr.appendChild(logo1Cell);
+        bindLogoPreview(logo1Input, logo1Preview);
+
+        var logo2Cell = document.createElement('td');
+        var logo2Wrap = createEl('div', 'logo-input-wrap');
+        var logo2Input = document.createElement('input');
+        logo2Input.type = 'text';
+        logo2Input.value = isCombined ? (team.logos[1] || '') : '';
+        logo2Input.placeholder = '校徽 2 文件名';
+        logo2Input.disabled = !isCombined;
+        logo2Input.setAttribute('data-field', 'logo2');
+        logo2Input.setAttribute('list', 'logoOptions');
+        var logo2Preview = createLogoPreview();
+        logo2Wrap.appendChild(logo2Input);
+        logo2Wrap.appendChild(logo2Preview);
+        logo2Cell.appendChild(logo2Wrap);
+        tr.appendChild(logo2Cell);
+        bindLogoPreview(logo2Input, logo2Preview);
+
+        combinedInput.addEventListener('change', function () {
+          logo2Input.disabled = !combinedInput.checked;
+          if (!combinedInput.checked) {
+            logo2Input.value = '';
+            logo2Input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
 
         teamBody.appendChild(tr);
       });
@@ -752,50 +1024,44 @@ define(function (require, exports, module) {
 
     els.teamEditor.appendChild(teamBody);
 
-    appendTableHeader(els.matchEditor, ['场次', '对阵', '辩题']);
-    var matchBody = document.createElement('tbody');
-    var map = buildTeamMap();
+    appendTableHeader(els.topicEditor, ['组别', '辩题', '正方完整辩题', '反方完整辩题']);
+    var topicBody = document.createElement('tbody');
 
     if (!data.groups.length) {
-      var noMatchRow = document.createElement('tr');
-      var noMatchCell = document.createElement('td');
-      noMatchCell.colSpan = 3;
-      noMatchCell.className = 'editor-empty';
-      noMatchCell.textContent = '暂无赛程数据';
-      noMatchRow.appendChild(noMatchCell);
-      matchBody.appendChild(noMatchRow);
+      var noTopicRow = document.createElement('tr');
+      var noTopicCell = document.createElement('td');
+      noTopicCell.colSpan = 4;
+      noTopicCell.className = 'editor-empty';
+      noTopicCell.textContent = '暂无小组赛辩题';
+      noTopicRow.appendChild(noTopicCell);
+      topicBody.appendChild(noTopicRow);
     } else {
       each(data.groups, function (group) {
-        var groupRow = document.createElement('tr');
-        var groupCell = document.createElement('td');
-        groupCell.colSpan = 3;
-        groupCell.className = 'editor-group-label';
-        groupCell.textContent = group.name + '（' + group.teamCodes.join(' / ') + '）';
-        groupRow.appendChild(groupCell);
-        matchBody.appendChild(groupRow);
+        var tr = document.createElement('tr');
+        tr.setAttribute('data-group-id', group.id);
+        tr.appendChild(createEl('td', 'editor-code', group.name));
 
-        each(group.matches, function (match) {
-          var tr = document.createElement('tr');
-          tr.appendChild(createEl('td', 'editor-code', match.id));
+        function topicField(field, value, placeholder) {
+          var cell = document.createElement('td');
+          var input = document.createElement('textarea');
+          input.rows = 2;
+          input.value = value || '';
+          input.placeholder = placeholder;
+          input.setAttribute('data-group-id', group.id);
+          input.setAttribute('data-field', field);
+          cell.appendChild(input);
+          tr.appendChild(cell);
+        }
 
-          var versusCell = createEl('td', 'editor-versus', teamFor(match.home, map).school + ' vs ' + teamFor(match.away, map).school);
-          tr.appendChild(versusCell);
+        topicField('topic', group.topic, '辩题（正方 / 反方）');
+        topicField('proTopic', group.proTopic, '正方完整辩题');
+        topicField('conTopic', group.conTopic, '反方完整辩题');
 
-          var topicCell = document.createElement('td');
-          var topicInput = document.createElement('textarea');
-          topicInput.rows = 2;
-          topicInput.value = match.topic;
-          topicInput.placeholder = '正方观点 / 反方观点';
-          topicInput.setAttribute('data-match-id', match.id);
-          topicCell.appendChild(topicInput);
-          tr.appendChild(topicCell);
-
-          matchBody.appendChild(tr);
-        });
+        topicBody.appendChild(tr);
       });
     }
 
-    els.matchEditor.appendChild(matchBody);
+    els.topicEditor.appendChild(topicBody);
     buildExtraEditor();
   }
 
@@ -805,13 +1071,13 @@ define(function (require, exports, module) {
     }
 
     els.extraMatchEditor.textContent = '';
-    appendTableHeader(els.extraMatchEditor, ['阶段', '场次', '对阵', '辩题', '操作']);
+    appendTableHeader(els.extraMatchEditor, ['阶段', '场次', '对阵', '辩题', '正方完整辩题', '反方完整辩题', '操作']);
     var extraBody = document.createElement('tbody');
 
     if (!data.extraMatches.length) {
       var noExtraRow = document.createElement('tr');
       var noExtraCell = document.createElement('td');
-      noExtraCell.colSpan = 5;
+      noExtraCell.colSpan = 7;
       noExtraCell.className = 'editor-empty';
       noExtraCell.textContent = '暂无额外场次，可在下方新增十六强、八强、半决赛或决赛场次';
       noExtraRow.appendChild(noExtraCell);
@@ -826,14 +1092,21 @@ define(function (require, exports, module) {
         var away = normalizeExtraTeam(match.away);
         tr.appendChild(createEl('td', 'editor-versus', home.school + ' vs ' + away.school));
 
-        var topicCell = document.createElement('td');
-        var topicInput = document.createElement('textarea');
-        topicInput.rows = 2;
-        topicInput.value = match.topic;
-        topicInput.placeholder = '正方观点 / 反方观点';
-        topicInput.setAttribute('data-extra-match-id', match.id);
-        topicCell.appendChild(topicInput);
-        tr.appendChild(topicCell);
+        function addTopicCell(field, value, placeholder) {
+          var cell = document.createElement('td');
+          var input = document.createElement('textarea');
+          input.rows = 2;
+          input.value = value || '';
+          input.placeholder = placeholder;
+          input.setAttribute('data-extra-match-id', match.id);
+          input.setAttribute('data-field', field);
+          cell.appendChild(input);
+          tr.appendChild(cell);
+        }
+
+        addTopicCell('topic', match.topic, '正方观点 / 反方观点');
+        addTopicCell('proTopic', match.proTopic, '正方完整辩题');
+        addTopicCell('conTopic', match.conTopic, '反方完整辩题');
 
         var actionCell = document.createElement('td');
         var deleteButton = createEl('button', 'ui-button ui-button--small ui-button--danger', '删除');
@@ -854,39 +1127,56 @@ define(function (require, exports, module) {
   function syncExtraTopics() {
     each(qsa('#extraMatchEditor textarea[data-extra-match-id]'), function (input) {
       var found = findMatch(input.getAttribute('data-extra-match-id'));
-      if (found) {
+      var field = input.getAttribute('data-field');
+      if (!found) {
+        return;
+      }
+      if (field === 'topic') {
         found.match.topic = trim(input.value) || '待定辩题';
+      } else if (field === 'proTopic') {
+        found.match.proTopic = trim(input.value);
+      } else if (field === 'conTopic') {
+        found.match.conTopic = trim(input.value);
       }
     });
   }
 
   function applyEditor() {
-    each(qsa('#teamEditor input[data-team-code]'), function (input) {
-      var code = input.getAttribute('data-team-code');
-      var field = input.getAttribute('data-field');
-      var team = null;
-
-      each(data.teams, function (item) {
-        if (item.code === code) {
-          team = item;
-        }
-      });
-
+    each(qsa('#teamEditor tbody tr[data-team-code]'), function (tr) {
+      var code = tr.getAttribute('data-team-code');
+      var team = findTeam(code);
       if (!team) {
         return;
       }
 
-      if (field === 'school') {
-        team.school = trim(input.value) || '待定';
-      } else if (field === 'logo') {
-        team.logo = trim(input.value);
+      var schoolInput = qs('input[data-field="school"]', tr);
+      var combinedInput = qs('input[data-field="combined"]', tr);
+      var logo1Input = qs('input[data-field="logo"]', tr);
+      var logo2Input = qs('input[data-field="logo2"]', tr);
+
+      team.school = trim(schoolInput.value) || '待定';
+
+      if (combinedInput && combinedInput.checked) {
+        team.logos = [trim(logo1Input.value), trim(logo2Input.value)];
+        team.logo = team.logos[0] || '';
+      } else {
+        team.logos = [];
+        team.logo = trim(logo1Input.value);
       }
     });
 
-    each(qsa('#matchEditor input[data-match-id], #matchEditor textarea[data-match-id]'), function (input) {
-      var found = findMatch(input.getAttribute('data-match-id'));
-      if (found) {
-        found.match.topic = trim(input.value) || '待定辩题';
+    each(qsa('#topicEditor textarea[data-group-id]'), function (input) {
+      var group = findGroup(input.getAttribute('data-group-id'));
+      var field = input.getAttribute('data-field');
+      if (!group) {
+        return;
+      }
+      if (field === 'topic') {
+        group.topic = trim(input.value) || '待定辩题';
+      } else if (field === 'proTopic') {
+        group.proTopic = trim(input.value);
+      } else if (field === 'conTopic') {
+        group.conTopic = trim(input.value);
       }
     });
 
@@ -926,6 +1216,27 @@ define(function (require, exports, module) {
     return round;
   }
 
+  function extraTeamFromForm(schoolInput, logoInput, logo2Input, combinedInput) {
+    var school = trim(schoolInput.value) || '待定';
+    var logo1 = trim(logoInput.value);
+
+    if (combinedInput && combinedInput.checked) {
+      return {
+        code: '',
+        school: school,
+        logo: logo1,
+        logos: [logo1, trim(logo2Input.value)]
+      };
+    }
+
+    return {
+      code: '',
+      school: school,
+      logo: logo1,
+      logos: []
+    };
+  }
+
   function addExtraMatch() {
     if (!els.extraStage) {
       return;
@@ -933,24 +1244,16 @@ define(function (require, exports, module) {
 
     syncExtraTopics();
     var stage = trim(els.extraStage.value) || '额外场次';
-    var homeSchool = trim(els.extraHomeSchool.value) || '待定';
-    var awaySchool = trim(els.extraAwaySchool.value) || '待定';
     var round = nextExtraRound(stage);
     var match = {
       id: generateExtraMatchId(),
       stage: stage,
       round: round,
-      home: {
-        code: '',
-        school: homeSchool,
-        logo: trim(els.extraHomeLogo.value)
-      },
-      away: {
-        code: '',
-        school: awaySchool,
-        logo: trim(els.extraAwayLogo.value)
-      },
-      topic: trim(els.extraTopic.value) || '待定辩题'
+      home: extraTeamFromForm(els.extraHomeSchool, els.extraHomeLogo, els.extraHomeLogo2, els.extraHomeCombined),
+      away: extraTeamFromForm(els.extraAwaySchool, els.extraAwayLogo, els.extraAwayLogo2, els.extraAwayCombined),
+      topic: trim(els.extraTopic.value) || '待定辩题',
+      proTopic: trim(els.extraProTopic.value),
+      conTopic: trim(els.extraConTopic.value)
     };
 
     data.extraMatches.push(match);
@@ -965,9 +1268,23 @@ define(function (require, exports, module) {
 
     els.extraHomeSchool.value = '';
     els.extraHomeLogo.value = '';
+    els.extraHomeLogo.dispatchEvent(new Event('input', { bubbles: true }));
+    els.extraHomeLogo2.value = '';
+    els.extraHomeLogo2.dispatchEvent(new Event('input', { bubbles: true }));
+    els.extraHomeCombined.checked = false;
+    els.extraHomeLogo2.disabled = true;
+    els.extraHomeLogo2Item.style.display = 'none';
     els.extraAwaySchool.value = '';
     els.extraAwayLogo.value = '';
+    els.extraAwayLogo.dispatchEvent(new Event('input', { bubbles: true }));
+    els.extraAwayLogo2.value = '';
+    els.extraAwayLogo2.dispatchEvent(new Event('input', { bubbles: true }));
+    els.extraAwayCombined.checked = false;
+    els.extraAwayLogo2.disabled = true;
+    els.extraAwayLogo2Item.style.display = 'none';
     els.extraTopic.value = '';
+    els.extraProTopic.value = '';
+    els.extraConTopic.value = '';
     els.extraHomeSchool.focus();
   }
 
@@ -990,6 +1307,18 @@ define(function (require, exports, module) {
     showToast('已删除场次');
   }
 
+  function extraTeamText(team) {
+    var normalized = normalizeExtraTeam(team);
+    if (isArray(normalized.logos) && normalized.logos.length >= 2) {
+      var logos = [];
+      each(normalized.logos, function (logo) {
+        logos.push(JSON.stringify(logo));
+      });
+      return '{ school: ' + JSON.stringify(normalized.school) + ', logos: [' + logos.join(', ') + '] }';
+    }
+    return '{ school: ' + JSON.stringify(normalized.school) + ', logo: ' + JSON.stringify(normalized.logo) + ' }';
+  }
+
   function serializeData(value) {
     var lines = [];
     lines.push('/*');
@@ -1000,16 +1329,19 @@ define(function (require, exports, module) {
     lines.push(' * 修改说明：');
     lines.push(' * 1. event：赛事名称、阶段、赞助商。');
     lines.push(' * 2. teams：参赛位与学校的对应关系。');
-    lines.push(' *    - code   参赛位编号，必须与 groups[].teamCodes 中的编号一致');
-    lines.push(' *    - school 学校名称；未确定时填写 "待定"');
-    lines.push(' *    - logo   assets/logo 目录下的文件名；没有校徽时留空 ""');
+    lines.push(' *    - code    参赛位编号，必须与 groups[].teamCodes 中的编号一致');
+    lines.push(' *    - school  学校名称；未确定时填写 "待定"');
+    lines.push(' *    - logo    单个学校的校徽文件名；没有校徽时留空 ""');
+    lines.push(' *    - logos   联队的两个校徽文件名，例如 ["中国海洋大学.webp", "北京工业大学.webp"]');
     lines.push(' * 3. groups：每个小组 3 支队伍，依次进行 1v2、2v3、3v1 三场比赛。');
+    lines.push(' *    - topic      辩题，正方与反方之间用 "/" 分隔');
+    lines.push(' *    - proTopic   正方完整辩题');
+    lines.push(' *    - conTopic   反方完整辩题');
     lines.push(' *    - matches[].home / away 填参赛位编号');
-    lines.push(' *    - matches[].topic 填该场辩题');
+    lines.push(' *    - matches[].date / time 填比赛日期和时间');
     lines.push(' * 4. extraMatches：十六强、八强、半决赛、决赛等额外场次。');
-    lines.push(' *    - home / away 直接填写学校名称和校徽文件名');
-    lines.push(' * 5. 辩题请用 " / " 分隔正方与反方。');
-    lines.push(' * 6. 修改保存后刷新网页即可生效。');
+    lines.push(' *    - home / away 直接填写学校名称、单校徽 logo 或联队校徽 logos');
+    lines.push(' * 5. 修改保存后刷新网页即可生效。');
     lines.push(' */');
     lines.push('');
     lines.push('window.TOURNAMENT_DATA = {');
@@ -1022,10 +1354,22 @@ define(function (require, exports, module) {
 
     each(value.teams, function (team, index) {
       var comma = index === value.teams.length - 1 ? '' : ',';
+      var logoPart = '';
+
+      if (isArray(team.logos) && team.logos.length >= 2) {
+        var logos = [];
+        each(team.logos, function (logo) {
+          logos.push(JSON.stringify(logo));
+        });
+        logoPart = ', logos: [' + logos.join(', ') + ']';
+      } else {
+        logoPart = ', logo: ' + JSON.stringify(team.logo || '');
+      }
+
       lines.push(
         '    { code: ' + JSON.stringify(team.code) +
         ', school: ' + JSON.stringify(team.school) +
-        ', logo: ' + JSON.stringify(team.logo) + ' }' + comma
+        logoPart + ' }' + comma
       );
     });
 
@@ -1043,6 +1387,9 @@ define(function (require, exports, module) {
       lines.push('    {');
       lines.push('      id: ' + JSON.stringify(group.id) + ',');
       lines.push('      name: ' + JSON.stringify(group.name) + ',');
+      lines.push('      topic: ' + JSON.stringify(group.topic) + ',');
+      lines.push('      proTopic: ' + JSON.stringify(group.proTopic) + ',');
+      lines.push('      conTopic: ' + JSON.stringify(group.conTopic) + ',');
       lines.push('      teamCodes: [' + codes.join(', ') + '],');
       lines.push('      matches: [');
 
@@ -1053,7 +1400,8 @@ define(function (require, exports, module) {
           ', round: ' + match.round +
           ', home: ' + JSON.stringify(match.home) +
           ', away: ' + JSON.stringify(match.away) +
-          ', topic: ' + JSON.stringify(match.topic) + ' }' + matchComma
+          ', date: ' + JSON.stringify(match.date || '') +
+          ', time: ' + JSON.stringify(match.time || '') + ' }' + matchComma
         );
       });
 
@@ -1069,17 +1417,19 @@ define(function (require, exports, module) {
       lines.push('  extraMatches: [');
       each(value.extraMatches, function (match, index) {
         var matchComma = index === value.extraMatches.length - 1 ? '' : ',';
-        var home = normalizeExtraTeam(match.home);
-        var away = normalizeExtraTeam(match.away);
+        var home = extraTeamText(match.home);
+        var away = extraTeamText(match.away);
         lines.push(
           '    { id: ' + JSON.stringify(match.id) +
           ', stage: ' + JSON.stringify(match.stage) +
           ', round: ' + match.round +
-          ', home: { school: ' + JSON.stringify(home.school) +
-          ', logo: ' + JSON.stringify(home.logo) + ' }' +
-          ', away: { school: ' + JSON.stringify(away.school) +
-          ', logo: ' + JSON.stringify(away.logo) + ' }' +
-          ', topic: ' + JSON.stringify(match.topic) + ' }' + matchComma
+          ', home: ' + home +
+          ', away: ' + away +
+          ', date: ' + JSON.stringify(match.date || '') +
+          ', time: ' + JSON.stringify(match.time || '') +
+          ', topic: ' + JSON.stringify(match.topic) +
+          ', proTopic: ' + JSON.stringify(match.proTopic || '') +
+          ', conTopic: ' + JSON.stringify(match.conTopic || '') + ' }' + matchComma
         );
       });
       lines.push('  ]');
@@ -1319,8 +1669,8 @@ define(function (require, exports, module) {
       var note = createEl(
         'p',
         'modal__note',
-        '校徽图片请放在 assets/logo/ 目录，并在“校徽文件”中填写文件名（例如：上海交通大学.webp）。' +
-        '辩题请用“ / ”分隔正方与反方，前半句显示在“正方持方”下，后半句显示在“反方持方”下。' +
+        '校徽图片请放在 assets/logo/ 目录，并在“校徽 1 / 校徽 2”中填写文件名（例如：上海交通大学.webp）。' +
+        '辩题请用“/”分隔正方与反方；在“小组赛辩题”中可以分别填写正方、反方的完整辩题。' +
         '网页不能静默覆盖本地文件：Chrome / Edge 可点击“保存到文件”选择根目录 data.js 覆盖；' +
         '其他浏览器请点击“下载数据文件”后手动替换。'
       );
@@ -1336,9 +1686,9 @@ define(function (require, exports, module) {
       var matchSection = createEl('section', 'editor-section');
       matchSection.appendChild(createEl('h3', '', '小组赛辩题'));
       var matchScroll = createEl('div', 'editor-scroll');
-      els.matchEditor = createEl('table', 'editor-table');
-      els.matchEditor.id = 'matchEditor';
-      matchScroll.appendChild(els.matchEditor);
+      els.topicEditor = createEl('table', 'editor-table');
+      els.topicEditor.id = 'topicEditor';
+      matchScroll.appendChild(els.topicEditor);
       matchSection.appendChild(matchScroll);
 
       var extraSection = createEl('section', 'editor-section');
@@ -1367,42 +1717,120 @@ define(function (require, exports, module) {
       els.extraStage.setAttribute('list', 'stageOptions');
       addExtraField('阶段', els.extraStage, true);
 
+      var homeSchoolWrap = createEl('div', 'extra-form__inline');
       els.extraHomeSchool = document.createElement('input');
       els.extraHomeSchool.type = 'text';
       els.extraHomeSchool.id = 'extraHomeSchool';
       els.extraHomeSchool.placeholder = '正方学校名称';
       els.extraHomeSchool.setAttribute('list', 'schoolOptions');
-      addExtraField('正方学校', els.extraHomeSchool, false);
+      homeSchoolWrap.appendChild(els.extraHomeSchool);
 
+      var homeCombinedLabel = createEl('label', 'extra-form__checkbox');
+      els.extraHomeCombined = document.createElement('input');
+      els.extraHomeCombined.type = 'checkbox';
+      homeCombinedLabel.appendChild(els.extraHomeCombined);
+      homeCombinedLabel.appendChild(document.createTextNode('联队'));
+      homeSchoolWrap.appendChild(homeCombinedLabel);
+      addExtraField('正方学校', homeSchoolWrap, false);
+
+      var homeLogoWrap = createEl('div', 'extra-form__logo-pair');
       els.extraHomeLogo = document.createElement('input');
       els.extraHomeLogo.type = 'text';
       els.extraHomeLogo.id = 'extraHomeLogo';
-      els.extraHomeLogo.placeholder = '正方校徽文件名（可选）';
+      els.extraHomeLogo.placeholder = '正方校徽 1 文件名';
       els.extraHomeLogo.setAttribute('list', 'logoOptions');
-      addExtraField('正方校徽', els.extraHomeLogo, false);
+      var homeLogoItem1 = createEl('div', 'logo-input-wrap');
+      var homeLogoPreview1 = createLogoPreview();
+      homeLogoItem1.appendChild(els.extraHomeLogo);
+      homeLogoItem1.appendChild(homeLogoPreview1);
+      bindLogoPreview(els.extraHomeLogo, homeLogoPreview1);
 
+      els.extraHomeLogo2 = document.createElement('input');
+      els.extraHomeLogo2.type = 'text';
+      els.extraHomeLogo2.id = 'extraHomeLogo2';
+      els.extraHomeLogo2.placeholder = '正方校徽 2 文件名';
+      els.extraHomeLogo2.disabled = true;
+      els.extraHomeLogo2.setAttribute('list', 'logoOptions');
+      var homeLogoItem2 = createEl('div', 'logo-input-wrap');
+      var homeLogoPreview2 = createLogoPreview();
+      homeLogoItem2.appendChild(els.extraHomeLogo2);
+      homeLogoItem2.appendChild(homeLogoPreview2);
+      homeLogoItem2.style.display = 'none';
+      bindLogoPreview(els.extraHomeLogo2, homeLogoPreview2);
+
+      homeLogoWrap.appendChild(homeLogoItem1);
+      homeLogoWrap.appendChild(homeLogoItem2);
+      els.extraHomeLogo2Item = homeLogoItem2;
+      addExtraField('正方校徽', homeLogoWrap, false);
+
+      var awaySchoolWrap = createEl('div', 'extra-form__inline');
       els.extraAwaySchool = document.createElement('input');
       els.extraAwaySchool.type = 'text';
       els.extraAwaySchool.id = 'extraAwaySchool';
       els.extraAwaySchool.placeholder = '反方学校名称';
       els.extraAwaySchool.setAttribute('list', 'schoolOptions');
-      addExtraField('反方学校', els.extraAwaySchool, false);
+      awaySchoolWrap.appendChild(els.extraAwaySchool);
 
+      var awayCombinedLabel = createEl('label', 'extra-form__checkbox');
+      els.extraAwayCombined = document.createElement('input');
+      els.extraAwayCombined.type = 'checkbox';
+      awayCombinedLabel.appendChild(els.extraAwayCombined);
+      awayCombinedLabel.appendChild(document.createTextNode('联队'));
+      awaySchoolWrap.appendChild(awayCombinedLabel);
+      addExtraField('反方学校', awaySchoolWrap, false);
+
+      var awayLogoWrap = createEl('div', 'extra-form__logo-pair');
       els.extraAwayLogo = document.createElement('input');
       els.extraAwayLogo.type = 'text';
       els.extraAwayLogo.id = 'extraAwayLogo';
-      els.extraAwayLogo.placeholder = '反方校徽文件名（可选）';
+      els.extraAwayLogo.placeholder = '反方校徽 1 文件名';
       els.extraAwayLogo.setAttribute('list', 'logoOptions');
-      addExtraField('反方校徽', els.extraAwayLogo, false);
+      var awayLogoItem1 = createEl('div', 'logo-input-wrap');
+      var awayLogoPreview1 = createLogoPreview();
+      awayLogoItem1.appendChild(els.extraAwayLogo);
+      awayLogoItem1.appendChild(awayLogoPreview1);
+      bindLogoPreview(els.extraAwayLogo, awayLogoPreview1);
 
-      bindSchoolAutofill(els.extraHomeSchool, els.extraHomeLogo);
-      bindSchoolAutofill(els.extraAwaySchool, els.extraAwayLogo);
+      els.extraAwayLogo2 = document.createElement('input');
+      els.extraAwayLogo2.type = 'text';
+      els.extraAwayLogo2.id = 'extraAwayLogo2';
+      els.extraAwayLogo2.placeholder = '反方校徽 2 文件名';
+      els.extraAwayLogo2.disabled = true;
+      els.extraAwayLogo2.setAttribute('list', 'logoOptions');
+      var awayLogoItem2 = createEl('div', 'logo-input-wrap');
+      var awayLogoPreview2 = createLogoPreview();
+      awayLogoItem2.appendChild(els.extraAwayLogo2);
+      awayLogoItem2.appendChild(awayLogoPreview2);
+      awayLogoItem2.style.display = 'none';
+      bindLogoPreview(els.extraAwayLogo2, awayLogoPreview2);
+
+      awayLogoWrap.appendChild(awayLogoItem1);
+      awayLogoWrap.appendChild(awayLogoItem2);
+      els.extraAwayLogo2Item = awayLogoItem2;
+      addExtraField('反方校徽', awayLogoWrap, false);
+
+      bindSchoolAutofill(els.extraHomeSchool, els.extraHomeLogo, els.extraHomeLogo2, els.extraHomeLogo2Item, els.extraHomeCombined);
+      bindSchoolAutofill(els.extraAwaySchool, els.extraAwayLogo, els.extraAwayLogo2, els.extraAwayLogo2Item, els.extraAwayCombined);
+      bindCombinedToggle(els.extraHomeCombined, els.extraHomeLogo2, els.extraHomeLogo2Item);
+      bindCombinedToggle(els.extraAwayCombined, els.extraAwayLogo2, els.extraAwayLogo2Item);
 
       els.extraTopic = document.createElement('textarea');
       els.extraTopic.id = 'extraTopic';
       els.extraTopic.rows = 2;
       els.extraTopic.placeholder = '正方观点 / 反方观点';
       addExtraField('辩题', els.extraTopic, true);
+
+      els.extraProTopic = document.createElement('textarea');
+      els.extraProTopic.id = 'extraProTopic';
+      els.extraProTopic.rows = 2;
+      els.extraProTopic.placeholder = '正方完整辩题';
+      addExtraField('正方完整辩题', els.extraProTopic, false);
+
+      els.extraConTopic = document.createElement('textarea');
+      els.extraConTopic.id = 'extraConTopic';
+      els.extraConTopic.rows = 2;
+      els.extraConTopic.placeholder = '反方完整辩题';
+      addExtraField('反方完整辩题', els.extraConTopic, false);
 
       var addExtraButton = createEl('button', 'ui-button ui-button--primary', '新增场次');
       addExtraButton.type = 'button';
@@ -1523,6 +1951,7 @@ define(function (require, exports, module) {
     ensureModals();
     ensureCurrentMatch();
     ensureSideTopics();
+    ensureTeamLogos();
     bindToolbar();
     renderCurrentMatch();
   }
