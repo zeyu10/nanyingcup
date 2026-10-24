@@ -489,12 +489,6 @@ define(function (require, exports, module) {
     });
   }
 
-  function setSchool(selector, school) {
-    each(qsa(selector), function (el) {
-      el.innerHTML = '<br>' + escapeHtml(school);
-    });
-  }
-
   function splitTopic(topic) {
     var parts = text(topic).split(/\s*\/\s*/);
     if (parts.length >= 2) {
@@ -530,13 +524,26 @@ define(function (require, exports, module) {
     return { topic: topic, pro: pro, con: con };
   }
 
-  function setSideTopics(info) {
-    each(qsa('.side-topic--left'), function (el) {
-      el.textContent = info.pro ? '正方：' + info.pro : '';
-    });
-    each(qsa('.side-topic--right'), function (el) {
-      el.textContent = info.con ? '反方：' + info.con : '';
-    });
+  function schoolNameText(school) {
+    var value = text(school);
+    var parts = value.split(/\s*&\s*/);
+    if (parts.length >= 2) {
+      return parts[0] + ' &\n' + parts.slice(1).join(' & ');
+    }
+    return value;
+  }
+
+  function eventTitleText() {
+    var name = trim(data.event.name);
+    var sponsor = trim(data.event.sponsor);
+    if (!sponsor || name.indexOf(sponsor) !== -1) {
+      return name;
+    }
+    var match = name.match(/^(\d{4})\s+(.+)$/);
+    if (match) {
+      return match[1] + ' ' + sponsor + ' ' + match[2];
+    }
+    return sponsor + ' ' + name;
   }
 
   function wrapSideHeading(heading, side) {
@@ -552,42 +559,108 @@ define(function (require, exports, module) {
     heading.classList.remove('pull-right');
     heading.classList.remove('pull-left');
     wrapper.appendChild(heading);
-    wrapper.appendChild(createEl('p', 'side-topic side-topic--' + side));
   }
 
-  function ensureSideTopics() {
+  function appendSideTopic(heading, side) {
+    var host = heading.parentNode;
+    while (host && host.classList && !host.classList.contains('col-lg-5') && !host.classList.contains('col-lg-12')) {
+      host = host.parentNode;
+    }
+    if (!host || !host.classList || qs('.side-topic--' + side, host)) {
+      return;
+    }
+    host.appendChild(createEl('p', 'side-topic side-topic--' + side));
+  }
+
+  function ensureTeamSideWrappers() {
     each(qsa('.pull-right.bian_name_left_head, .pull-right.bian_name_left'), function (heading) {
       wrapSideHeading(heading, 'left');
+      appendSideTopic(heading, 'left');
     });
 
     each(qsa('.pull-left.bian_name_right_head, .pull-left.bian_name_right'), function (heading) {
       wrapSideHeading(heading, 'right');
+      appendSideTopic(heading, 'right');
+    });
+  }
+
+  function ensurePageMatchInfo() {
+    each(qsa('.main > .container-fluid'), function (section) {
+      if (qs('#eventName', section) || qs('#judgeEventName', section) || qs('.page-match-info', section)) {
+        return;
+      }
+
+      var wrapper = createEl('div', 'row text-center page-match-info');
+      var title = createEl('h1', 'event-title page-event-title');
+      title.appendChild(document.createTextNode('········· '));
+      title.appendChild(createEl('strong', 'page-event-name'));
+      title.appendChild(document.createTextNode(' ·········'));
+      wrapper.appendChild(title);
+      wrapper.appendChild(createEl('h2', 'current-match-label page-match-label'));
+      wrapper.appendChild(createEl('p', 'current-match-topic page-match-topic'));
+      section.insertBefore(wrapper, section.firstChild);
+    });
+  }
+
+  function setTextAll(selector, value) {
+    each(qsa(selector), function (el) {
+      el.textContent = value;
+    });
+  }
+
+  function formatSideTopic(value) {
+    return text(value)
+      .replace(/\\n/g, '\n')
+      .replace(/\r\n?/g, '\n')
+      .trim();
+  }
+
+  function setSideTopics(info) {
+    var pro = formatSideTopic(info.pro);
+    var con = formatSideTopic(info.con);
+
+    each(qsa('.side-topic--left'), function (el) {
+      el.textContent = pro;
+    });
+    each(qsa('.side-topic--right'), function (el) {
+      el.textContent = con;
     });
   }
 
   function renderCurrentMatch() {
     var found = findMatch(currentMatchId);
     var eventName = qs('#eventName');
-    var eventSponsor = qs('#eventSponsor');
+    var judgeEventName = qs('#judgeEventName');
     if (eventName) {
-      eventName.textContent = data.event.name;
+      eventName.textContent = eventTitleText();
     }
-    if (eventSponsor) {
-      eventSponsor.textContent = data.event.sponsor;
+    if (judgeEventName) {
+      judgeEventName.textContent = eventTitleText();
     }
+    setTextAll('.page-event-name', eventTitleText());
 
     var label = qs('#currentMatchLabel');
     var topic = qs('#currentMatchTopic');
+    var judgeLabel = qs('#judgeMatchLabel');
+    var judgeTopic = qs('#judgeMatchTopic');
 
     if (!found) {
       if (label) {
         label.textContent = data.event.stage;
       }
+      if (judgeLabel) {
+        judgeLabel.textContent = data.event.stage;
+      }
       if (topic) {
         topic.textContent = '未找到赛程数据，请检查 data.js';
       }
+      if (judgeTopic) {
+        judgeTopic.textContent = '未找到赛程数据，请检查 data.js';
+      }
+      setTextAll('.page-match-label', data.event.stage);
+      setTextAll('.page-match-topic', '未找到赛程数据，请检查 data.js');
       setSideTopics({ pro: '', con: '' });
-      document.title = data.event.name;
+      document.title = eventTitleText();
       return;
     }
 
@@ -597,28 +670,36 @@ define(function (require, exports, module) {
 
     setImages('.pull-right.bianfang_image', home);
     setImages('.pull-left.bianfang_image', away);
-    setSchool('.daibiao_left_head, .daibiao_left', home.school);
-    setSchool('.daibiao_right_head, .daibiao_right', away.school);
 
-    each(qsa('.pull-right.bian_name_left_head, .pull-right.bian_name_left'), function (el) {
-      el.textContent = '正方持方';
+    each(qsa('.bian_name_left_head, .bian_name_left'), function (el) {
+      el.textContent = schoolNameText(home.school);
     });
-    each(qsa('.pull-left.bian_name_right_head, .pull-left.bian_name_right'), function (el) {
-      el.textContent = '反方持方';
+    each(qsa('.bian_name_right_head, .bian_name_right'), function (el) {
+      el.textContent = schoolNameText(away.school);
     });
 
     var info = topicInfo(found);
     setSideTopics(info);
+    var dateTime = matchDateTime(found.match);
+    var labelText = matchLabel(found) + (dateTime ? ' · ' + dateTime : '');
+    var topicText = '辩题：' + formatBigTopic(info.topic);
 
     if (label) {
-      var dateTime = matchDateTime(found.match);
-      label.textContent = matchLabel(found) + (dateTime ? ' · ' + dateTime : '');
+      label.textContent = labelText;
     }
     if (topic) {
-      topic.textContent = '辩题：' + formatBigTopic(info.topic);
+      topic.textContent = topicText;
     }
+    if (judgeLabel) {
+      judgeLabel.textContent = labelText;
+    }
+    if (judgeTopic) {
+      judgeTopic.textContent = topicText;
+    }
+    setTextAll('.page-match-label', labelText);
+    setTextAll('.page-match-topic', topicText);
 
-    document.title = home.school + ' vs ' + away.school + ' | ' + matchLabel(found) + ' · ' + data.event.name;
+    document.title = home.school + ' vs ' + away.school + ' | ' + matchLabel(found) + ' · ' + eventTitleText();
   }
 
   function selectMatch(id, options) {
@@ -1054,8 +1135,8 @@ define(function (require, exports, module) {
         }
 
         topicField('topic', group.topic, '辩题（正方 / 反方）');
-        topicField('proTopic', group.proTopic, '正方完整辩题');
-        topicField('conTopic', group.conTopic, '反方完整辩题');
+        topicField('proTopic', group.proTopic, '正方完整辩题（回车或 \\n 换行）');
+        topicField('conTopic', group.conTopic, '反方完整辩题（回车或 \\n 换行）');
 
         topicBody.appendChild(tr);
       });
@@ -1105,8 +1186,8 @@ define(function (require, exports, module) {
         }
 
         addTopicCell('topic', match.topic, '正方观点 / 反方观点');
-        addTopicCell('proTopic', match.proTopic, '正方完整辩题');
-        addTopicCell('conTopic', match.conTopic, '反方完整辩题');
+        addTopicCell('proTopic', match.proTopic, '正方完整辩题（回车或 \\n 换行）');
+        addTopicCell('conTopic', match.conTopic, '反方完整辩题（回车或 \\n 换行）');
 
         var actionCell = document.createElement('td');
         var deleteButton = createEl('button', 'ui-button ui-button--small ui-button--danger', '删除');
@@ -1335,8 +1416,8 @@ define(function (require, exports, module) {
     lines.push(' *    - logos   联队的两个校徽文件名，例如 ["中国海洋大学.webp", "北京工业大学.webp"]');
     lines.push(' * 3. groups：每个小组 3 支队伍，依次进行 1v2、2v3、3v1 三场比赛。');
     lines.push(' *    - topic      辩题，正方与反方之间用 "/" 分隔');
-    lines.push(' *    - proTopic   正方完整辩题');
-    lines.push(' *    - conTopic   反方完整辩题');
+    lines.push(' *    - proTopic   正方完整辩题；可用 \\n 或直接换行指定断行位置');
+    lines.push(' *    - conTopic   反方完整辩题；可用 \\n 或直接换行指定断行位置');
     lines.push(' *    - matches[].home / away 填参赛位编号');
     lines.push(' *    - matches[].date / time 填比赛日期和时间');
     lines.push(' * 4. extraMatches：十六强、八强、半决赛、决赛等额外场次。');
@@ -1670,7 +1751,7 @@ define(function (require, exports, module) {
         'p',
         'modal__note',
         '校徽图片请放在 assets/logo/ 目录，并在“校徽 1 / 校徽 2”中填写文件名（例如：上海交通大学.webp）。' +
-        '辩题请用“/”分隔正方与反方；在“小组赛辩题”中可以分别填写正方、反方的完整辩题。' +
+        '辩题请用“/”分隔正方与反方；在“小组赛辩题”中可以分别填写正方、反方的完整辩题（回车换行，或输入 \\n 表示换行）。' +
         '网页不能静默覆盖本地文件：Chrome / Edge 可点击“保存到文件”选择根目录 data.js 覆盖；' +
         '其他浏览器请点击“下载数据文件”后手动替换。'
       );
@@ -1823,13 +1904,13 @@ define(function (require, exports, module) {
       els.extraProTopic = document.createElement('textarea');
       els.extraProTopic.id = 'extraProTopic';
       els.extraProTopic.rows = 2;
-      els.extraProTopic.placeholder = '正方完整辩题';
+      els.extraProTopic.placeholder = '正方完整辩题（回车或 \\n 换行）';
       addExtraField('正方完整辩题', els.extraProTopic, false);
 
       els.extraConTopic = document.createElement('textarea');
       els.extraConTopic.id = 'extraConTopic';
       els.extraConTopic.rows = 2;
-      els.extraConTopic.placeholder = '反方完整辩题';
+      els.extraConTopic.placeholder = '反方完整辩题（回车或 \\n 换行）';
       addExtraField('反方完整辩题', els.extraConTopic, false);
 
       var addExtraButton = createEl('button', 'ui-button ui-button--primary', '新增场次');
@@ -1950,7 +2031,8 @@ define(function (require, exports, module) {
   function init() {
     ensureModals();
     ensureCurrentMatch();
-    ensureSideTopics();
+    ensureTeamSideWrappers();
+    ensurePageMatchInfo();
     ensureTeamLogos();
     bindToolbar();
     renderCurrentMatch();

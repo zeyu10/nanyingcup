@@ -151,19 +151,22 @@ define(function(require,exports,moudles){
                             $("#confirmBtnFree").css("display", "none");
                             $("#discardBtnFree").css("display", "none");
                             $("#inputFree").css("display", "none");
+
+                            var total = parseInt($("#inputFree").val(), 10);
+                            if (!(total > 0)) {
+                              total = 120;
+                            }
+                            $("#inputFree").data('total', total).val(total);
+                            altolTime = Math.floor(total / 2);
+
                             if(altolTime < 10){
                                 contentDiv.css({"color":"red"});
                             }else{
                                 contentDiv.css({"color":"white"});
                             }
-                            altolTime = $("#inputFree").val();
 
                             console.log(altolTime);
                             contentDiv.html(sencondToTimer(altolTime));//显示在容器中的内容
-                            if (o.input_id !== "input") {
-                              $("#"+o.input_id).val(altolTime);
-                              console.log($("#"+o.input_id).val());
-                            }
                             clearTimeout(stimeClock);
                           });
                         }
@@ -425,7 +428,8 @@ define(function(require,exports,moudles){
                             $("#confirmBtnFree").css("display", "inline-block");
                             $("#discardBtnFree").css("display", "inline-block");
                             $("#inputFree").css("display", "inline-block");
-                            $("#inputFree").val(60);
+                            var total = parseInt($("#inputFree").data('total'), 10);
+                            $("#inputFree").val(total > 0 ? total : 120);
                             return;
                           }
 

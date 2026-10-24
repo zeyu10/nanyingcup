@@ -55,6 +55,88 @@ define(function(require,exports,module){
         // direction: "horizontal"
      });
 
+     setupPageNavigation();
+
+     function setupPageNavigation() {
+        var $pagination = $('.onepage-pagination');
+        var $sections = $('.main > .container-fluid');
+        if (!$pagination.length || !$sections.length) {
+          return;
+        }
+
+        var usedLabels = {};
+        $pagination.empty();
+
+        $sections.each(function(index) {
+          var $section = $(this);
+          var label = '';
+
+          if (index === 0) {
+            label = '主页';
+          } else if ($section.find('.judge-comment-title').length) {
+            label = $.trim($section.find('.judge-comment-title').first().text());
+          } else {
+            label = $.trim($section.find('h1').not('.event-title').first().text());
+          }
+
+          if (!label) {
+            label = '第 ' + (index + 1) + ' 页';
+          }
+          if (usedLabels[label]) {
+            usedLabels[label] += 1;
+            label = label + ' ' + usedLabels[label];
+          } else {
+            usedLabels[label] = 1;
+          }
+
+          var $link = $('<a></a>')
+            .attr('href', '#' + (index + 1))
+            .attr('data-index', index + 1)
+            .text(label);
+          $('<li></li>').append($link).appendTo($pagination);
+        });
+
+        $pagination.css('margin-top', 0);
+        var currentIndex = $('.main > .container-fluid.active').data('index') || 1;
+        $pagination.find('a[data-index="' + currentIndex + '"]').addClass('active');
+
+        var hideTimer = null;
+
+        function revealNavigation() {
+          $pagination.addClass('is-visible');
+          if (hideTimer) {
+            clearTimeout(hideTimer);
+          }
+          hideTimer = setTimeout(function() {
+            $pagination.removeClass('is-visible');
+          }, 2200);
+        }
+
+        function holdNavigation() {
+          if (hideTimer) {
+            clearTimeout(hideTimer);
+          }
+          $pagination.addClass('is-visible');
+        }
+
+        function scheduleHideNavigation() {
+          if (hideTimer) {
+            clearTimeout(hideTimer);
+          }
+          hideTimer = setTimeout(function() {
+            $pagination.removeClass('is-visible');
+          }, 800);
+        }
+
+        $(document).on('mousemove mousedown wheel keydown touchstart', revealNavigation);
+        $pagination.on('mouseenter', holdNavigation).on('mouseleave', scheduleHideNavigation);
+        $pagination.find('a').on('click', function(event) {
+          event.preventDefault();
+          revealNavigation();
+          $('.main').moveTo($(this).data('index'));
+        });
+     }
+
     
 
     $("#timedown2").custimer({
@@ -893,6 +975,16 @@ define(function(require,exports,module){
     $("#beginBtn9_1").on('click',function()
     {
             flag =0;
+    });
+    $("#beginBtn9Aff").on('click',function(){
+        $("#stopBtn9").click();
+        $("#stopBtn9_1").click();
+        $("#beginBtn9").click();
+    });
+    $("#beginBtn9Neg").on('click',function(){
+        $("#stopBtn9").click();
+        $("#stopBtn9_1").click();
+        $("#beginBtn9_1").click();
     });
     $("#doubleBtn").on('click',function(){
         if(flag == 1){

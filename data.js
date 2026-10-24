@@ -12,8 +12,8 @@
  *    - logos   联队的两个校徽文件名，例如 ["中国海洋大学.webp", "北京工业大学.webp"]
  * 3. groups：每个小组 3 支队伍，依次进行 1v2、2v3、3v1 三场比赛。
  *    - topic      辩题，正方与反方之间用 "/" 分隔
- *    - proTopic   正方完整辩题
- *    - conTopic   反方完整辩题
+ *    - proTopic   正方完整辩题；可用 \n 或直接换行指定断行位置
+ *    - conTopic   反方完整辩题；可用 \n 或直接换行指定断行位置
  *    - matches[].home / away 填参赛位编号
  *    - matches[].date / time 填比赛日期和时间
  * 4. extraMatches：十六强、八强、半决赛、决赛等额外场次。
@@ -60,8 +60,8 @@ window.TOURNAMENT_DATA = {
       id: "A",
       name: "A组",
       topic: "人工智能时代，人类的不可替代性是一种值得坚守的价值 / 应该放下的执念",
-      proTopic: "人工智能时代，人类的不可替代性是一种值得坚守的价值",
-      conTopic: "人工智能时代，人类的不可替代性是一种应该放下的执念",
+      proTopic: "人工智能时代，人类的不可替代性是一种\n值得坚守的价值",
+      conTopic: "人工智能时代，人类的不可替代性是一种\n应该放下的执念",
       teamCodes: ["A1", "A2", "A3"],
       matches: [
         { id: "A-1", round: 1, home: "A1", away: "A2", date: "12月11日", time: "09:00 - 11:00" },
@@ -73,8 +73,8 @@ window.TOURNAMENT_DATA = {
       id: "B",
       name: "B组",
       topic: "人工智能时代，人类的不可替代性是一种值得坚守的价值 / 应该放下的执念",
-      proTopic: "人工智能时代，人类的不可替代性是一种值得坚守的价值",
-      conTopic: "人工智能时代，人类的不可替代性是一种应该放下的执念",
+      proTopic: "人工智能时代，人类的不可替代性是一种\n值得坚守的价值",
+      conTopic: "人工智能时代，人类的不可替代性是一种\n应该放下的执念",
       teamCodes: ["B1", "B2", "B3"],
       matches: [
         { id: "B-1", round: 1, home: "B1", away: "B2", date: "12月11日", time: "09:00 - 11:00" },
